@@ -20,7 +20,7 @@ Modules included:
 
 '''
 
-from posemapper import posemap
+from smpl_webuser.posemapper import posemap
 import chumpy
 import numpy as np
 

@@ -23,11 +23,14 @@ Modules included:
 __all__ = ['load_model', 'save_model']
 
 import numpy as np
-import cPickle as pickle
+try: 
+    import cPickle as pickle
+except:
+    import pickle
 import chumpy as ch
 from chumpy.ch import MatVecMult
-from posemapper import posemap
-from verts import verts_core
+from smpl_webuser.posemapper import posemap
+from smpl_webuser.verts import verts_core
     
 def save_model(model, fname):
     m0 = model
@@ -77,7 +80,12 @@ def backwards_compatibility_replacements(dd):
 def ready_arguments(fname_or_dict):
 
     if not isinstance(fname_or_dict, dict):
-        dd = pickle.load(open(fname_or_dict))
+        with open(fname_or_dict, 'rb') as f:
+            dd = pickle.load(f, encoding='bytes')
+        print('model keys = {}'.format(dd.keys()))
+        dd1 = {k.decode('ascii'): v for k, v in dd.items()}
+        print('model keys = {}'.format(dd1.keys()))
+        dd = dd1
     else:
         dd = fname_or_dict
         
