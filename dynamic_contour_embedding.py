@@ -29,7 +29,7 @@ except:
 
 def load_static_embedding(static_embedding_path):
     with open(static_embedding_path, 'rb') as f:
-        lmk_indexes_dict = pickle.load(f)
+        lmk_indexes_dict = pickle.load(f, encoding='latin1')
     lmk_face_idx = lmk_indexes_dict[ 'lmk_face_idx' ].astype( np.uint32 )
     lmk_b_coords = lmk_indexes_dict[ 'lmk_b_coords' ]
     return lmk_face_idx, lmk_b_coords
@@ -45,7 +45,7 @@ def mesh_points_by_barycentric_coordinates(mesh_verts, mesh_faces, lmk_face_idx,
 def load_dynamic_contour(template_flame_path='None', contour_embeddings_path='None', static_embedding_path='None', angle=0):
     template_mesh = Mesh(filename=template_flame_path)
     contour_embeddings_path = contour_embeddings_path
-    dynamic_lmks_embeddings = np.load(contour_embeddings_path, allow_pickle=True).item()
+    dynamic_lmks_embeddings = np.load(contour_embeddings_path, allow_pickle=True, encoding='latin1').item()
     lmk_face_idx_static, lmk_b_coords_static = load_static_embedding(static_embedding_path)
     lmk_face_idx_dynamic = dynamic_lmks_embeddings['lmk_face_idx'][angle]
     lmk_b_coords_dynamic = dynamic_lmks_embeddings['lmk_b_coords'][angle]
