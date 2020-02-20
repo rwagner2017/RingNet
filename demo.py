@@ -61,7 +61,13 @@ def visualize(img, proc_param, verts, cam, img_name='test_image'):
     rend_img_overlay = renderer(
         vert_shifted*1.0, cam=cam_for_render, img=img, do_alpha=True)
     rend_img = renderer(
-        vert_shifted*1.0, cam=cam_for_render, img_size=img.shape[:2])
+        vert_shifted*1.0, cam=cam_for_render, img_size=img.shape[:2], do_alpha=True)
+
+    mask = rend_img[:, :, 3] > 0
+    blended = np.array(img)
+    img_weight = 0.3
+    blended[mask] = blended[mask] * img_weight + rend_img[mask, 0:3] * (1.0 - img_weight)
+
     rend_img_vp1 = renderer.rotated(
         vert_shifted, 30, cam=cam_for_render, img_size=img.shape[:2])
 
@@ -73,7 +79,8 @@ def visualize(img, proc_param, verts, cam, img_name='test_image'):
     plt.title('input')
     plt.axis('off')
     plt.subplot(222)
-    plt.imshow(rend_img_overlay)
+    # plt.imshow(rend_img_overlay)
+    plt.imshow(blended)
     plt.title('3D Mesh overlay')
     plt.axis('off')
     plt.subplot(223)
@@ -86,7 +93,7 @@ def visualize(img, proc_param, verts, cam, img_name='test_image'):
     plt.axis('off')
     plt.draw()
     plt.show(block=False)
-    fig.savefig(img_name + '.png')
+    fig.savefig(img_name + '.png', bbox_inches='tight')
     # import ipdb
     # ipdb.set_trace()
 
