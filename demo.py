@@ -30,9 +30,6 @@ based on github.com/akanazawa/hmr
 # python -m demo --img_path *.jpg --out_folder ./RingNet_output --save_obj_file=True --save_flame_parameters=True
 ## To output both meshes and flame parameters and generate a neutralized mesh run the following command
 # python -m demo --img_path *.jpg --out_folder ./RingNet_output --save_obj_file=True --save_flame_parameters=True --neutralize_expression=True
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import sys
 import os
@@ -50,7 +47,7 @@ from util import image as img_util
 from config_test import get_config
 from run_RingNet import RingNet_inference
 
-def visualize(img, proc_param, verts, cam, img_name='test_image'):
+def visualize(img, proc_param, verts, cam, renderer, img_name='test_image'):
     """
     Renders the result in original image coordinate frame.
     """
@@ -97,18 +94,17 @@ def visualize(img, proc_param, verts, cam, img_name='test_image'):
     # import ipdb
     # ipdb.set_trace()
 
-def preprocess_image(img_path):
+def preprocess_image(img_path, img_size):
     img = io.imread(img_path)
-    if np.max(img.shape[:2]) != config.img_size:
-        print('Resizing so the max image size is %d..' % config.img_size)
-        scale = (float(config.img_size) / np.max(img.shape[:2]))
+    if np.max(img.shape[:2]) != img_size:
+        print('Resizing so the max image size is %d..' % img_size)
+        scale = (float(img_size) / np.max(img.shape[:2]))
     else:
         scale = 1.0#scaling_factor
     center = np.round(np.array(img.shape[:2]) / 2).astype(int)
     # image center in (x,y)
     center = center[::-1]
-    crop, proc_param = img_util.scale_and_crop(img, scale, center,
-                                               config.img_size)
+    crop, proc_param = img_util.scale_and_crop(img, scale, center, img_size)
     # import ipdb; ipdb.set_trace()
     # Normalize image to [-1, 1]
     # plt.imshow(crop/255.0)
@@ -121,10 +117,10 @@ def preprocess_image(img_path):
 def main(config, template_mesh):
     sess = tf.Session()
     model = RingNet_inference(config, sess=sess)
-    input_img, proc_param, img = preprocess_image(config.img_path)
+    input_img, proc_param, img = preprocess_image(config.img_path, config.img_size)
     vertices, flame_parameters = model.predict(np.expand_dims(input_img, axis=0), get_parameters=True)
     cams = flame_parameters[0][:3]
-    visualize(img, proc_param, vertices[0], cams, img_name=config.out_folder + '/images/' + config.img_path.split('/')[-1][:-4])
+    visualize(img, proc_param, vertices[0], cams, renderer, img_name=config.out_folder + '/images/' + config.img_path.split('/')[-1][:-4])
 
     if config.save_obj_file:
         if not os.path.exists(config.out_folder + '/mesh'):
@@ -145,8 +141,6 @@ def main(config, template_mesh):
             os.mkdir(config.out_folder + '/neutral_mesh')
         neutral_mesh = make_prdicted_mesh_neutral(config.out_folder + '/params/' + config.img_path.split('/')[-1][:-4] + '.npy', config.flame_model_path)
         neutral_mesh.write_obj(config.out_folder + '/neutral_mesh/' + config.img_path.split('/')[-1][:-4] + '.obj')
-
-
 
 
 if __name__ == '__main__':

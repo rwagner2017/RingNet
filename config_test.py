@@ -26,9 +26,13 @@ from absl import flags
 
 PRETRAINED_MODEL = './model/ring_6_68641'
 
-flags.DEFINE_string('img_path', '/ps/project/face2d3d/face2mesh/website_release_testings/single_image_test/000001.jpg', 'Image to run')
+flags.DEFINE_string('img_path', './input_images/000001.jpg', 'Image to run')
+flags.DEFINE_string('in_folder', './input_images', 'Input images dir')
 flags.DEFINE_string('out_folder', './RingNet_output',
                      'The output path to store images')
+
+flags.DEFINE_boolean('save_viz', False,
+                     'If true a rendered visualization plot will be saved')
 
 flags.DEFINE_boolean('save_obj_file', False,
                      'If true the output meshes will be saved')
