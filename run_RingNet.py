@@ -25,6 +25,10 @@ from __future__ import division
 from __future__ import print_function
 
 import tensorflow as tf
+
+# import tensorflow.compat.v1 as tf
+# tf.disable_v2_behavior()
+
 import numpy as np
 from os.path import exists
 
@@ -54,6 +58,7 @@ class RingNet_inference(object):
             self.sess = sess
 
         # Load graph.
+        print('Loading saved model from {}'.format(self.load_path+'.meta'))
         self.saver = tf.train.import_meta_graph(self.load_path+'.meta')
         self.graph = tf.get_default_graph()
         self.prepare()
@@ -93,3 +98,19 @@ class RingNet_inference(object):
         results = self.sess.run(fetch_dict, feed_dict)
         tf.reset_default_graph()
         return results
+
+    def run(self, element):
+        # images_ip = self.graph.get_tensor_by_name(u'input_images_1:0')
+        params = self.graph.get_tensor_by_name(u'add_2:0')
+        verts = self.graph.get_tensor_by_name(u'Flamenetnormal_2/Add_9:0')
+        # feed_dict = {
+        #     images_ip: images,
+        # }
+        fetch_dict = {
+            'vertices': verts,
+            'parameters': params,
+        }
+        results = self.sess.run(element)
+        tf.reset_default_graph()
+        return results
+
