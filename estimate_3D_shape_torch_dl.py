@@ -7,6 +7,7 @@ from torchvision import transforms, utils
 import matplotlib.pyplot as plt
 import tensorflow as tf
 import time
+from psbody.mesh import Mesh
 
 from config_test import get_config
 from demo import preprocess_image
@@ -57,6 +58,7 @@ def main(config):
     dataloader = DataLoader(transformed_dataset, batch_size=4,
                             shuffle=False, num_workers=4)
 
+    template_mesh = Mesh(filename='./flame_model/FLAME_sample.ply')
 
     sess = tf.Session()
     model = RingNet_inference(config, sess=sess)
@@ -78,11 +80,11 @@ def main(config):
             duration = inf_end - inf_start
             inference_times.append(duration)
 
-            # if config.save_obj_file:
-            #     if not os.path.exists(config.out_folder + '/mesh'):
-            #         os.mkdir(config.out_folder + '/mesh')
-            #     mesh = Mesh(v=vertices[0], f=template_mesh.f)
-            #     mesh.write_obj(config.out_folder + '/mesh/' +  '{}.obj'.format(img_name))
+            if config.save_obj_file:
+                if not os.path.exists(config.out_folder + '/mesh'):
+                    os.mkdir(config.out_folder + '/mesh')
+                mesh = Mesh(v=vertices[0], f=template_mesh.f)
+                mesh.write_obj(config.out_folder + '/mesh/' +  '{}.obj'.format(img_name))
 
             if config.save_flame_parameters:
                 if not os.path.exists(config.out_folder + '/params'):
