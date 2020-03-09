@@ -38,7 +38,12 @@ import numpy as np
 import skimage.io as io
 import cv2
 import matplotlib.pyplot as plt
+
 import tensorflow as tf
+
+# import tensorflow.compat.v1 as tf
+# tf.disable_v2_behavior()
+
 from psbody.mesh import Mesh
 from smpl_webuser.serialization import load_model
 
@@ -68,7 +73,6 @@ def visualize(img, proc_param, verts, cam, renderer, img_name='test_image'):
     rend_img_vp1 = renderer.rotated(
         vert_shifted, 30, cam=cam_for_render, img_size=img.shape[:2])
 
-    import matplotlib.pyplot as plt
     fig = plt.figure(1)
     plt.clf()
     plt.subplot(221)
@@ -94,10 +98,48 @@ def visualize(img, proc_param, verts, cam, renderer, img_name='test_image'):
     # import ipdb
     # ipdb.set_trace()
 
+
+def visualize_single_row(img, proc_param, verts, cam, renderer, img_name='test_image'):
+    """
+    Renders the result in original image coordinate frame.
+    """
+    cam_for_render, vert_shifted = vis_util.get_original(
+        proc_param, verts, cam, img_size=img.shape[:2])
+
+    # Render results
+    rend_img_overlay = renderer(
+        vert_shifted*1.0, cam=cam_for_render, img=img, do_alpha=True)
+    rend_img = renderer(
+        vert_shifted*1.0, cam=cam_for_render, img_size=img.shape[:2], do_alpha=True)
+
+    mask = rend_img[:, :, 3] > 0
+    blended = np.array(img)
+    img_weight = 0.3
+    blended[mask] = blended[mask] * img_weight + rend_img[mask, 0:3] * (1.0 - img_weight)
+
+    fig,ax = plt.subplots(1,3,figsize=(10,4))
+    ax[0].imshow(img)
+    ax[0].set_title('Input Image')
+
+    ax[1].imshow(rend_img)
+    ax[1].set_title('Estimated 3D Shape')
+
+    ax[2].imshow(blended)
+    ax[2].set_title('Overlay')
+    for a in ax:
+        a.axis('off')
+
+    plt.show(block=False)
+    fig.savefig(img_name + '.png', bbox_inches='tight')
+    # import ipdb
+    # ipdb.set_trace()
+    plt.close('all')
+
+
 def preprocess_image(img_path, img_size):
     img = io.imread(img_path)
     if np.max(img.shape[:2]) != img_size:
-        print('Resizing so the max image size is %d..' % img_size)
+        # print('Resizing so the max image size is %d..' % img_size)
         scale = (float(img_size) / np.max(img.shape[:2]))
     else:
         scale = 1.0#scaling_factor
@@ -115,12 +157,15 @@ def preprocess_image(img_path, img_size):
 
 
 def main(config, template_mesh):
-    sess = tf.Session()
-    model = RingNet_inference(config, sess=sess)
+    # sess = tf.Session()
+    # model = RingNet_inference(config, sess=sess)
+    model = RingNet_inference(config, sess=None)
+
     input_img, proc_param, img = preprocess_image(config.img_path, config.img_size)
     vertices, flame_parameters = model.predict(np.expand_dims(input_img, axis=0), get_parameters=True)
     cams = flame_parameters[0][:3]
-    visualize(img, proc_param, vertices[0], cams, renderer, img_name=config.out_folder + '/images/' + config.img_path.split('/')[-1][:-4])
+    # visualize(img, proc_param, vertices[0], cams, renderer, img_name=config.out_folder + '/images/' + config.img_path.split('/')[-1][:-4])
+    visualize_single_row(img, proc_param, vertices[0], cams, renderer, img_name=config.out_folder + '/images/' + config.img_path.split('/')[-1][:-4])
 
     if config.save_obj_file:
         if not os.path.exists(config.out_folder + '/mesh'):
