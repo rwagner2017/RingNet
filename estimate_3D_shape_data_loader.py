@@ -39,6 +39,10 @@ def decode_img(img):
 
 def process_path(file_path):
     # label = get_label(file_path)
+    # b_file_path = file_path.numpy()
+    # img_path = b_file_path.decode('UTF-8')
+    # print(img_path)
+
     label = 0
     # load the raw data from the file as a string
     img = tf.io.read_file(file_path)
@@ -162,7 +166,13 @@ def main(config):
     print('n_images {}, batch size {}, n_reps = {}'.format(n_images, BATCH_SIZE, n_reps))
 
     for batch_num in range(n_reps):
+        print('batch number {}'.format(batch_num))
+
         next_element = iterator.get_next()
+        print('next element type {}'.format(type(next_element)))
+        print('next element type {}'.format(next_element))
+
+
         batch = next_element[0].eval(session=model.sess)
         img_paths = next_element[2].eval(session=model.sess)
         print(img_paths.shape)
@@ -171,7 +181,7 @@ def main(config):
         print(img_paths)
         n_batch_images = batch.shape[0]
         print('{}: {}'.format(batch_num, n_batch_images))
-        print('batch number {}'.format(batch_num))
+
         for idx in range(n_batch_images):
             img_path = img_paths[idx].decode('UTF-8')
             print('{}: <{}>'.format(idx, img_path))
