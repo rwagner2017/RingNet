@@ -31,6 +31,9 @@ def main(config):
 
     img_paths = glob.glob(os.path.join(config.in_folder, '*'))
 
+    if (config.save_viz or config.save_obj_file):
+        template_mesh = Mesh(filename='./flame_model/FLAME_sample.ply')
+
     sess = tf.Session()
     model = RingNet_inference(config, sess=sess)
 
@@ -55,7 +58,6 @@ def main(config):
                 os.mkdir(config.out_folder + '/images')
 
             cams = flame_parameters[0][:3]
-            template_mesh = Mesh(filename='./flame_model/FLAME_sample.ply')
             renderer = vis_util.SMPLRenderer(faces=template_mesh.f)
             # visualize(img, proc_param, vertices[0], cams, renderer, img_name=config.out_folder + '/images/' + img_path.split('/')[-1][:-4])
             visualize_single_row(img, proc_param, vertices[0], cams, renderer, img_name=config.out_folder + '/images/' + img_path.split('/')[-1][:-4])
