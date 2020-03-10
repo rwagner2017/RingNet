@@ -27,7 +27,8 @@ from absl import flags
 PRETRAINED_MODEL = './model/ring_6_68641'
 
 flags.DEFINE_string('img_path', './input_images/000001.jpg', 'Image to run')
-flags.DEFINE_string('in_folder', './input_images', 'Input images dir')
+# flags.DEFINE_string('in_folder', './input_images', 'Input images dir') # for TF data loader
+flags.DEFINE_string('in_folder', './input_images/persons', 'Input images dir')
 flags.DEFINE_string('out_folder', './RingNet_output',
                      'The output path to store images')
 
