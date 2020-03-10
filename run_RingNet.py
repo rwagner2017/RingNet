@@ -95,7 +95,22 @@ class RingNet_inference(object):
             'vertices': verts,
             'parameters': params,
         }
+
+        print('Pre-Inference memory')
+        print(self.sess.run(tf.contrib.memory_stats.MaxBytesInUse()))
+        print(self.sess.run(tf.contrib.memory_stats.BytesInUse()))
+
         results = self.sess.run(fetch_dict, feed_dict)
+
+        print('Post-Inference memory')
+        print(self.sess.run(tf.contrib.memory_stats.MaxBytesInUse()))
+        print(self.sess.run(tf.contrib.memory_stats.BytesInUse()))
+
+        # run_metadata = tf.RunMetadata()
+        # results = self.sess.run(fetch_dict, feed_dict, options=tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE, output_partition_graphs=True), run_metadata=run_metadata)
+        # with open("gpu_stats.txt", "w") as out:
+        #     out.write(str(run_metadata))
+
         tf.reset_default_graph()
         return results
 
