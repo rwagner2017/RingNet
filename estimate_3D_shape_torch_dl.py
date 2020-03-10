@@ -60,7 +60,14 @@ def main(config):
 
     template_mesh = Mesh(filename='./flame_model/FLAME_sample.ply')
 
-    sess = tf.Session()
+    # sess = tf.Session()
+
+    tf_config = tf.ConfigProto()
+    # dynamically grow the memory used on the GPU
+    tf_config.gpu_options.allow_growth = True
+    sess = tf.Session(config=tf_config)
+
+
     model = RingNet_inference(config, sess=sess)
 
     inference_times = []
