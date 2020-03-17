@@ -3,3 +3,5 @@ __pycache__
 model
 output
 RingNet_output
+logs
+gpu_stats.txt
