@@ -91,7 +91,7 @@ def main(config):
     print('mean_inference_time = {}'.format(mean_inference_time))
 
     n_images = len(img_paths)
-    throughput = n_images / np.sum(pre_process_times) + np.sum(inference_times)
+    throughput = n_images / (np.sum(pre_process_times) + np.sum(inference_times))
     print('total images = {} throughput = {}/s'.format(n_images, throughput))
 
     throughput = n_images / overall_duration
