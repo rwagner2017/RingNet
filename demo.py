@@ -37,6 +37,12 @@ from absl import flags
 import numpy as np
 import skimage.io as io
 import cv2
+
+# import mttkinter as tkinter
+
+import matplotlib as mpl
+# mpl.use('Qt5Agg')
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 
 import tensorflow as tf
@@ -124,12 +130,15 @@ def visualize_single_row(img, proc_param, verts, cam, renderer, img_name='test_i
     ax[1].imshow(rend_img)
     ax[1].set_title('Estimated 3D Shape')
 
+    cv2.imwrite('rendered_img.png', rend_img)
+
     ax[2].imshow(blended)
     ax[2].set_title('Overlay')
     for a in ax:
         a.axis('off')
 
-    plt.show(block=False)
+    plt.draw()
+    # plt.show(block=False)
     fig.savefig(img_name + '.png', bbox_inches='tight')
     # import ipdb
     # ipdb.set_trace()
