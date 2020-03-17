@@ -9,8 +9,9 @@ import tensorflow as tf
 import time
 from psbody.mesh import Mesh
 
+from util import renderer as vis_util
 from config_test import get_config
-from demo import preprocess_image
+from demo import preprocess_image, visualize_single_row
 from run_RingNet import RingNet_inference
 
 
@@ -32,12 +33,15 @@ class FaceDataset(Dataset):
             idx = idx.tolist()
 
         img_path = self.img_paths[idx]
+        pre_start = time.time()
         cropped_img, proc_param, img = preprocess_image(img_path, self.img_size)
+        pre_end = time.time()
+        pre_process_time = pre_end - pre_start
 
         img_filename = os.path.basename(img_path)
         img_name = os.path.splitext(img_filename)[0]
 
-        return {'image': cropped_img, 'name': img_name, 'proc_param': proc_param}
+        return {'image': cropped_img, 'name': img_name, 'proc_param': proc_param, 'pre_process_time': pre_process_time}
 
 
 # # Helper function to show a batch
@@ -52,6 +56,10 @@ class FaceDataset(Dataset):
 
 
 def main(config):
+    print('Tensorflow version {}'.format(tf.__version__))
+    print("Input Dir: <{}>".format(config.in_folder))
+    print("Output Dir: <{}>".format(config.out_folder))
+
     transformed_dataset = FaceDataset(config.in_folder, config.img_size)
 
     # Dataloader
@@ -70,6 +78,7 @@ def main(config):
 
     model = RingNet_inference(config, sess=sess)
 
+    pre_process_times = []
     inference_times = []
     start = time.time()
     for i_batch, sample_batched in enumerate(dataloader):
@@ -80,12 +89,24 @@ def main(config):
         for idx in range(n_images):
             img = sample_batched['image'][idx]
             img_name = sample_batched['name'][idx]
+            proc_param = sample_batched['proc_param'][idx]
+            preprocess_time = sample_batched['pre_process_time'][idx]
+            pre_process_times.append(preprocess_time)
 
             inf_start = time.time()
             vertices, flame_parameters = model.predict(np.expand_dims(img, axis=0), get_parameters=True)
             inf_end = time.time()
             duration = inf_end - inf_start
             inference_times.append(duration)
+
+            if config.save_viz:
+                if not os.path.exists(config.out_folder + '/images'):
+                    os.mkdir(config.out_folder + '/images')
+
+                cams = flame_parameters[0][:3]
+                renderer = vis_util.SMPLRenderer(faces=template_mesh.f)
+                visualize_single_row(img, proc_param, vertices[0], cams, renderer,
+                                     img_name=config.out_folder + '/images/' + img_name)
 
             if config.save_obj_file:
                 if not os.path.exists(config.out_folder + '/mesh'):
@@ -103,12 +124,18 @@ def main(config):
     end = time.time()
     overall_duration = end - start
 
+    mean_pre_process_time = np.mean(pre_process_times)
+    print('mean_pre_process_time = {}'.format(mean_pre_process_time))
+
     mean_inference_time = np.mean(inference_times)
     print('mean_inference_time = {}'.format(mean_inference_time))
 
     n_images = len(transformed_dataset)
+    throughput = n_images / (np.sum(pre_process_times) + np.sum(inference_times))
+    print('total images = {} throughput = {}/s using pre proccess and inference times'.format(n_images, throughput))
+
     throughput = n_images / overall_duration
-    print('total images = {} duration {} throughput = {}/s'.format(n_images, overall_duration, throughput))
+    print('total images = {} overall duration {} throughput = {}/s'.format(n_images, overall_duration, throughput))
 
 
 
