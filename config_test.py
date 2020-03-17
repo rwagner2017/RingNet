@@ -26,19 +26,20 @@ from absl import flags
 
 PRETRAINED_MODEL = './model/ring_6_68641'
 
-flags.DEFINE_string('img_path', './input_images/000001.jpg', 'Image to run')
+flags.DEFINE_string('img_path', './input_images/persons/000001.jpg', 'Image to run')
 # flags.DEFINE_string('in_folder', './input_images', 'Input images dir') # for TF data loader
-flags.DEFINE_string('in_folder', './input_images/persons', 'Input images dir')
+# flags.DEFINE_string('in_folder', './input_images/persons', 'Input images dir') # PyTorch data loader
+flags.DEFINE_string('in_folder', '/mnt/data/head_study/rand_sample/persons', 'Input images dir')
 flags.DEFINE_string('out_folder', './RingNet_output',
                      'The output path to store images')
 
-flags.DEFINE_boolean('save_viz', False,
+flags.DEFINE_boolean('save_viz', True,
                      'If true a rendered visualization plot will be saved')
 
 flags.DEFINE_boolean('save_obj_file', False,
                      'If true the output meshes will be saved')
 
-flags.DEFINE_boolean('save_flame_parameters', False,
+flags.DEFINE_boolean('save_flame_parameters', True,
                      'If true the camera and flame parameters will be saved')
 
 flags.DEFINE_boolean('neutralize_expression', False,
