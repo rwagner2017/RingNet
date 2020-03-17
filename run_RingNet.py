@@ -96,15 +96,15 @@ class RingNet_inference(object):
             'parameters': params,
         }
 
-        print('Pre-Inference memory')
-        print(self.sess.run(tf.contrib.memory_stats.MaxBytesInUse()))
-        print(self.sess.run(tf.contrib.memory_stats.BytesInUse()))
+        # print('Pre-Inference memory')
+        # print(self.sess.run(tf.contrib.memory_stats.MaxBytesInUse()))
+        # print(self.sess.run(tf.contrib.memory_stats.BytesInUse()))
 
         results = self.sess.run(fetch_dict, feed_dict)
 
-        print('Post-Inference memory')
-        print(self.sess.run(tf.contrib.memory_stats.MaxBytesInUse()))
-        print(self.sess.run(tf.contrib.memory_stats.BytesInUse()))
+        # print('Post-Inference memory')
+        # print(self.sess.run(tf.contrib.memory_stats.MaxBytesInUse()))
+        # print(self.sess.run(tf.contrib.memory_stats.BytesInUse()))
 
         # run_metadata = tf.RunMetadata()
         # results = self.sess.run(fetch_dict, feed_dict, options=tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE, output_partition_graphs=True), run_metadata=run_metadata)
@@ -113,6 +113,7 @@ class RingNet_inference(object):
 
         tf.reset_default_graph()
         return results
+
 
     def run(self, element):
         # images_ip = self.graph.get_tensor_by_name(u'input_images_1:0')
